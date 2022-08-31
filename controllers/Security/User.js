@@ -6,16 +6,12 @@ const CustomError = require("../../utils/customError");
 
 class userController {
   async login(req, res) {
-    const validatedData = Validations.user.validate(req.body);
-    if (validatedData.error) throw res.status(422).send(validatedData);
-    //  // find In Db 
-    const user = await User.findOne({ userName: req.body.userName });
-    if (!user) {
-      res.status(422).send("user not found");
-    } else {
-      user && user.userPassword == req.body.userPassword ?
-        res.status(200).send(response(STRINGS.TEXTS.UserLogin, user)) :
-        res.status(422).send("password not match");
+    try {
+      const user = await User.findOne({ userName: req.body.userName, userPassword: req.body.userPassword });
+      if (!user) throw res.status(500).send(response(STRINGS.ERRORS.Authentication, err, false))
+      res.status(200).send(response(STRINGS.TEXTS.UserLogin, user));
+    } catch (err) {
+      res.status(500).send(response(STRINGS.ERRORS.Authentication, err, false))
     }
 
   }
